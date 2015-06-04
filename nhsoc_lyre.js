@@ -263,10 +263,15 @@ CSVOutputFormat.prototype.handleRecord = function(record, orderedFieldNames) {
 }
 CSVOutputFormat.prototype.stop = function() {}
 
-function JSONArrayOutputFormat() {}
+function JSONArrayOutputFormat() {
+	this.record_count = 0
+}
 JSONArrayOutputFormat.prototype.start = function(fieldNames) {console.log("[")}
 JSONArrayOutputFormat.prototype.handleRecord = function(record, orderedFieldNames) {
+	if (this.record_count > 0)
+		console.log(",")
 	console.log(JSON.stringify(record, undefined, 2))
+	this.record_count++
 }
 JSONArrayOutputFormat.prototype.stop = function() { console.log("]") }
 
