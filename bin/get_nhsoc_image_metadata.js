@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-var nhsoc_lyre = require("./nhsoc_lyre")
+var nhsoc_lyre = require("../nhsoc_lyre")
 var _ = require("underscore")
 var program = require('commander')
 

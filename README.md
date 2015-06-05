@@ -1,6 +1,8 @@
 # Introduction
 
-New Horizons Science Operations Center Lyre (hereafter, "nhsoc_lyre") is a command script for pulling down LORRI image metadata from the New Horizons project website.
+New Horizons Science Operations Center Lyre (hereafter, "nhsoc_lyre") is a command line script for pulling down LORRI image metadata from the New Horizons project website. When this was written, the New Horizons spacecraft was well on its way to the Pluto System. After completing a flyby, it will proceed to one or more targets in the Kuiper Belt.
+
+This program isn't officially affiliated with or endorsed by the New Horizons project.
 
 # Implementation
 
@@ -18,39 +20,65 @@ The data from the inline JavaScript code doesn't include image publish dates. Co
 
 You'll need to install [Node.js and npm](https://nodejs.org) before you can install ngsoc_lyre.
 
-To install nhsoc_lyre, download the source archive from github, or (after first installing git if necessary) clone the project directly from github.
+Once you have Node.js and npm, you can chose to install nhsoc_lyre automatically, or from sources.
+
+If you decide you install it automatically, you'll need to choose between installing it globally or locally.
+
+## Global Automated Installation
+
+If you have access to your system's root account and you don't mind using it, you can install nhsoc_lyre globally from its remote npm repository. This is the easiest installation method because it doesn't require you to know or care where any of the script files are installed to on your file system.
+
+To use this method, type
+
+`sudo npm -g install nhsoc_lyre`
+
+This should put the get_nhsoc_image_metadata.js script (see Usage, below) on your system path.
+
+## Local Automated Installation
+
+If you don't have access to the root account, or you're uncomfortable using it, you can install nhsoc_lyre locally. Change into a convenient directory and type
+
+`npm install nhsoc_lyre`
+
+This will install `./node_modules/nhsoc_lyre/` relative to this location. This new directory will in turn will contain a `.bin` sub-directory. You should either prefix the get_nhsoc_image_metadata.js script with a relative path to this sub-directory from the current directory at execution time, or add it to your system path.
+
+## Installation from Sources
+
+To install nhsoc_lyre from sources, download the source archive from github, or (after first installing git if necessary) clone the project directly from github.
 
 Now change into the nhsoc_lyre project directory and type
 
 `npm install`
 
+Now you should be able to run the get_nhsoc_image_metadata.js script in `./bin`, or add this sub-directory to your system path.
+
+## Troubleshooting installation
+
 You shouldn't receive any error messages or be prompted to escalate shell privileges. Should either of these things happen, Node.js may not have weathered an operating system upgrade applied since its installation. You may be able to workaround by renaming or deleting the ``.npm`` sub-directory in your home directory.
 
 # Usage
 
-To run the script,
+To run the script, type
 
-`./lyre.js`
+`get_nhsoc_image_metadata.js`
 
-You will probably find it useful to direct nhsoc_lyre's JSON output to a file
+(prefixing with the appropriate relative path if necessary; see Installation, above)
 
-`./lyre.js > pluto_images.csv`
+You will probably find it useful to direct nhsoc_lyre's output to a file
+
+`get_nhsoc_image_metadata.js > pluto_images.csv`
 
 The default output format is CSV. If you prefer, you can specify JSON
 
-`./lyre.js > pluto_images.json --format=JSON`
+`get_nhsoc_image_metadata.js > pluto_images.json --format=JSON`
 
 If you'd prefer a single page of data, provide that page's number as an argument
 
-`./lyre.js > nhsoc_pluto_images.json --page=1`
+`get_nhsoc_image_metadata.js > nhsoc_pluto_images.csv --page=1`
 
 If you elect to pull down metadata for all images on the project website, you should expect it to take a minute of time or longer.
 
 Although nhsoc_lyre doesn't retrieve actual images, it nevertheless can request a large amount of data. Please remember that this data and the server that hosts it are provided for everyone's benefit and use them respectfully.
-
-If your shell user account has write access to the place where scripts are kept on your system, you should be able to create a `lyre` symbolic link by typing
-
-`npm link`
 
 # Validation
 
@@ -69,10 +97,6 @@ This test suite shouldn't need a working network connection and won't attempt to
 ## Why is the script named "New Horizons Science Operations Center Lyre"?
 
 The lyre reference is an allusion to the myth of Orpheus.
-
-## Is it officially affiliated with or endorsed by the New Horizons project?
-
-No.
 
 ## Why was it implemented in JavaScript?
 

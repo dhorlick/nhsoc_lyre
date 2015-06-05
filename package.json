@@ -1,13 +1,13 @@
 {
   "name": "nhsoc_lyre",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Catalogues New Horizons LORRI images.",
   "author": "Dave Horlick",
   "repository": {
     "type": "git",
     "url": "https://github.com/dhorlick/nhsoc_lyre"
   },
-  "keywords": ["Pluto", "Charon", "Nix", "Hydra", "Styx", "Kerberos", "LORRI"],
+  "keywords": ["Pluto", "Charon", "Nix", "Hydra", "Styx", "Kerberos", "LORRI", "KBO"],
   "license": "(MIT OR Apache-2.0)",
   "engines": {
     "node": ">=0.10"
@@ -19,7 +19,7 @@
     "underscore": "^1.8.3"
   },
   "bin": {
-    "lyre": "./lyre.js"
+    "lyre": ".bin/get_nhsoc_image_metadata.js"
   },
   "main": "nhsoc_lyre.js",
   "scripts": {
