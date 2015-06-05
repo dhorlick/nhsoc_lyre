@@ -22,25 +22,13 @@ You'll need to install [Node.js and npm](https://nodejs.org) before you can inst
 
 Once you have Node.js and npm, you can chose to install nhsoc_lyre automatically, or from sources.
 
-If you decide you install it automatically, you'll need to choose between installing it globally or locally.
+## Automated Installation
 
-## Global Automated Installation
-
-If you have access to your system's root account and you don't mind using it, you can install nhsoc_lyre globally from its remote npm repository. This is the easiest installation method because it doesn't require you to know or care where any of the script files are installed to on your file system.
-
-To use this method, type
-
-`sudo npm -g install nhsoc_lyre`
-
-This should put the get_nhsoc_image_metadata.js script (see Usage, below) on your system path.
-
-## Local Automated Installation
-
-If you don't have access to the root account, or you're uncomfortable using it, you can install nhsoc_lyre locally. Change into a convenient directory and type
+Change into a convenient directory and type
 
 `npm install nhsoc_lyre`
 
-This will install `./node_modules/nhsoc_lyre/` relative to this location. This new directory will in turn will contain a `.bin` sub-directory. You should either prefix the get_nhsoc_image_metadata.js script with a relative path to this sub-directory from the current directory at execution time, or add it to your system path.
+This will install `./node_modules/nhsoc_lyre/` relative to this location. This new directory will in turn will contain a `.bin` sub-directory. You should either prefix the get_nhsoc_image_metadata script with a relative path to this sub-directory from the current directory at execution time, or add it to your system path.
 
 ## Installation from Sources
 
@@ -50,7 +38,7 @@ Now change into the nhsoc_lyre project directory and type
 
 `npm install`
 
-Now you should be able to run the get_nhsoc_image_metadata.js script in `./bin`, or add this sub-directory to your system path.
+Now you should be able to run the get_nhsoc_image_metadata script in `./bin`, or add this sub-directory to your system path.
 
 ## Troubleshooting installation
 
@@ -60,21 +48,21 @@ You shouldn't receive any error messages or be prompted to escalate shell privil
 
 To run the script, type
 
-`get_nhsoc_image_metadata.js`
+`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata`
 
 (prefixing with the appropriate relative path if necessary; see Installation, above)
 
 You will probably find it useful to direct nhsoc_lyre's output to a file
 
-`get_nhsoc_image_metadata.js > pluto_images.csv`
+`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata > pluto_images.csv`
 
 The default output format is CSV. If you prefer, you can specify JSON
 
-`get_nhsoc_image_metadata.js > pluto_images.json --format=JSON`
+`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata > pluto_images.json --format=JSON`
 
 If you'd prefer a single page of data, provide that page's number as an argument
 
-`get_nhsoc_image_metadata.js > nhsoc_pluto_images.csv --page=1`
+`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata > nhsoc_pluto_images.csv --page=1`
 
 If you elect to pull down metadata for all images on the project website, you should expect it to take a minute of time or longer.
 
