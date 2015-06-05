@@ -28,7 +28,7 @@ Change into a convenient directory and type
 
 `npm install nhsoc_lyre`
 
-This will install `./node_modules/nhsoc_lyre/` relative to this location. This new directory will in turn will contain a `.bin` sub-directory. You should either prefix the get_nhsoc_image_metadata script with a relative path to this sub-directory from the current directory at execution time, or add it to your system path.
+This will install `./node_modules/` relative to this location. This new directory will in turn will contain a `.bin` sub-directory. You should either prefix the get_nhsoc_image_metadata script with a relative path to this sub-directory from the current directory at execution time, or add it to your system path.
 
 ## Installation from Sources
 
@@ -48,21 +48,21 @@ You shouldn't receive any error messages or be prompted to escalate shell privil
 
 To run the script, type
 
-`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata`
+`./node_modules/.bin/get_nhsoc_image_metadata`
 
 (prefixing with the appropriate relative path if necessary; see Installation, above)
 
 You will probably find it useful to direct nhsoc_lyre's output to a file
 
-`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata > pluto_images.csv`
+`./node_modules/.bin/get_nhsoc_image_metadata > pluto_images.csv`
 
 The default output format is CSV. If you prefer, you can specify JSON
 
-`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata > pluto_images.json --format=JSON`
+`./node_modules/.bin/get_nhsoc_image_metadata > pluto_images.json --format=JSON`
 
 If you'd prefer a single page of data, provide that page's number as an argument
 
-`./node_modules/nhsoc_lyre/.bin/get_nhsoc_image_metadata > nhsoc_pluto_images.csv --page=1`
+`./node_modules/.bin/get_nhsoc_image_metadata > nhsoc_pluto_images.csv --page=1`
 
 If you elect to pull down metadata for all images on the project website, you should expect it to take a minute of time or longer.
 
