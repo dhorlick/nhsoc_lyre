@@ -131,8 +131,9 @@ function catalogueImagesFromNewHorizonsWebsite(page, format, testMode)
 					saltInJpegLastModifiedHeader(results, "last-modified", "last modified", outputHandler, orderedFieldNames)
 				}
 				else {
-					for (i=0; i<results.length; i++)
+					for (var i=0; i<results.length; i++) {
 						outputHandler.handleRecord(results[i], orderedFieldNames)
+					}
 					outputHandler.stop()
 				}
 
@@ -194,7 +195,7 @@ function multiZip(zippingRequest, optionalResults)
 	}
 	
 	var arrLength = lengths[0]
-	for (i=0; i<arrLength; i++)
+	for (var i=0; i<arrLength; i++)
 	{
 		var result = {}
 		
@@ -275,6 +276,46 @@ JSONArrayOutputFormat.prototype.handleRecord = function(record, orderedFieldName
 }
 JSONArrayOutputFormat.prototype.stop = function() { console.log("]") }
 
+function XMLOutputFormat() {}
+XMLOutputFormat.prototype.start = function(fieldNames) {
+	console.log("<?xml version=\"1.0\"?>")
+	console.log("<images>")
+}
+function escapeForXmlValue(content)
+{
+	if (content===undefined)
+		return ""
+	var result = tabular_output.replaceAll(content, "&", "&amp;")
+	result = tabular_output.replaceAll(content, "<", "&lt;")
+	result = tabular_output.replaceAll(content, ">", "&gt;")
+	result = tabular_output.replaceAll(content, "\"", "&quot;")
+	return result
+}
+function escapeForQName(content)
+{
+	var result = tabular_output.replaceAll(content, " ", "_")
+	for (i=0; i<content.length; i++)
+	{
+		var ch = content.charAt(i)
+		switch (ch)
+		{
+			case "&", "<", ">", "/", "\\", ":": throw "Elaborate punctuation not permitted: \"" + ch + "\"."
+					// TODO escape punctuation, etc. Not so critical since we decide the field names to begin with.
+		}
+	}
+
+	return result
+}
+XMLOutputFormat.prototype.handleRecord = function(record, orderedFieldNames) {
+	var expressions = _.map(orderedFieldNames, function(fieldName) {
+		return escapeForQName(fieldName) + "=\"" + escapeForXmlValue(record[fieldName]) + "\""
+	})
+	console.log("\t<image " + expressions.join(" ") + "/>")
+}
+XMLOutputFormat.prototype.stop = function() {
+	console.log("</images>")
+}
+
 function outputHandlerForFormat(format)
 {
 	uppercaseFormat = format.toUpperCase()
@@ -283,6 +324,7 @@ function outputHandlerForFormat(format)
 	{
 		case "CSV": return new CSVOutputFormat()
 		case "JSON": return new JSONArrayOutputFormat()
+		case "XML": return new XMLOutputFormat()
 		default: throw "Unsupported format: " + format
 	}
 }

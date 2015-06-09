@@ -20,7 +20,7 @@ The data from the inline JavaScript code doesn't include image publish dates. Co
 
 You'll need to install [Node.js and npm](https://nodejs.org) before you can install ngsoc_lyre.
 
-Once you have Node.js and npm, you can chose to install nhsoc_lyre automatically, or from sources.
+Once you have Node.js and npm, you can choose to install nhsoc_lyre automatically, or from sources.
 
 ## Automated Installation
 
@@ -56,7 +56,7 @@ You will probably find it useful to direct nhsoc_lyre's output to a file
 
 `./node_modules/.bin/get_nhsoc_image_metadata > pluto_images.csv`
 
-The default output format is CSV. If you prefer, you can specify JSON
+The default output format is CSV. If you prefer, you can specify JSON or XML
 
 `./node_modules/.bin/get_nhsoc_image_metadata > pluto_images.json --format=JSON`
 

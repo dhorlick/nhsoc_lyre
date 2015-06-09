@@ -8,7 +8,7 @@ var program = require('commander')
 program
 	.description("pull down an image metadata catalogue from the New Horizons website.")
 	.option('-p, --page [page]', 'page', parseInt)
-	.option('-f, --format [format]', 'output format CSV|JSON. defaults to CSV')
+	.option('-f, --format [format]', 'output format CSV|JSON|XML. defaults to CSV')
 
 program.parse(process.argv)
 
