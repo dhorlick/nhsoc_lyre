@@ -8,6 +8,10 @@ var vm = require("vm")
 var _ = require("underscore")
 var url = require("url")
 var querystring = require("querystring")
+var tabular_input = require("./tabular_input")
+var jsdom = require("jsdom")
+
+var ORDERED_FIELD_NAMES = ["description", "thumb", "jpeg", "status", "meta", "acquired", "target", "range", "exposure", "name", "last modified"]
 
 /**
  * @param if provided, will pull down only the requested page number.
@@ -22,8 +26,7 @@ function catalogueImagesFromNewHorizonsWebsite(page, format, testMode)
 		format = "CSV"
 
 	var outputHandler = outputHandlerForFormat(format)
-	var orderedFieldNames = ["description", "thumb", "jpeg", "status", "meta", "acquired", "target", "range", "exposure", "name", "last modified"]
-	outputHandler.start(orderedFieldNames)
+	outputHandler.start(ORDERED_FIELD_NAMES)
 
 	var captureJs = false
 	var inlineScripting = ""
@@ -128,11 +131,11 @@ function catalogueImagesFromNewHorizonsWebsite(page, format, testMode)
 					throw "No results returned."
 
 				if (!testMode) {
-					saltInJpegLastModifiedHeader(results, "last-modified", "last modified", outputHandler, orderedFieldNames)
+					saltInJpegLastModifiedHeader(results, "last-modified", "last modified", outputHandler, ORDERED_FIELD_NAMES)
 				}
 				else {
 					for (var i=0; i<results.length; i++) {
-						outputHandler.handleRecord(results[i], orderedFieldNames)
+						outputHandler.handleRecord(results[i], ORDERED_FIELD_NAMES)
 					}
 					outputHandler.stop()
 				}
@@ -329,5 +332,274 @@ function outputHandlerForFormat(format)
 	}
 }
 
+function strEndsWith(str, suffix)
+{
+	if (str === undefined || str === null)
+		throw "No str provided."
+	return str.indexOf(suffix, str.length - suffix.length) !== -1
+}
+
+function importFile(filePath, objArrayHandler)
+{
+	if (!filePath)
+		throw "No filePath provided."
+
+	if (strEndsWith(filePath, ".csv"))
+	{
+		return tabular_input.loadCsvFile(filePath, objArrayHandler)
+	}
+	else if (strEndsWith(filePath, ".json"))
+	{
+		throw "JSON import not yet implemented."
+	}
+	else if (strEndsWith(filePath, ".xml"))
+	{
+		throw "XML import not yet implemented."
+	}
+}
+
+function CatalogueIndexDifferences(keysAdded, keysRemoved, changes, catalogueIndex1, catalogueIndex2) {
+	if (!_.isArray(keysAdded))
+		throw "Provided keysAdded is not an array."
+	if (!_.isArray(keysRemoved))
+		throw "Provided keysRemoved is not an array."
+	if (!_.isObject(changes) || _.isArray(changes))
+		throw "Provided changes is not an associative array."
+	this.keysAdded = keysAdded
+	this.keysRemoved = keysRemoved
+	this.changes = changes
+	this.catalogueIndex1 = catalogueIndex1
+	this.catalogueIndex2 = catalogueIndex2
+}
+CatalogueIndexDifferences.prototype.toCsv = function() {
+	var results = "disposition,"
+    // TODO make sure header names are the header in both records
+	results += tabular_output.formatCsvRecord(this.catalogueIndex1.orderedFieldNames)
+	results += "\n"
+
+	var that = this
+
+	results += _.map(this.keysAdded, function(keyAdded) {
+		var rowObj = that.catalogueIndex2.pkIndex[keyAdded]
+		if (rowObj===undefined)
+			throw "Could not find keyAdded: "+keyAdded+"."
+
+		return "+,"+tabular_output.formatCsvRecord(_.map(that.catalogueIndex1.orderedFieldNames, function(fieldName) {
+                return rowObj[fieldName]
+            }))
+	}).join("\n")
+
+	results += _.map(this.keysRemoved, function(keyRemoved) {
+		var rowObj = that.catalogueIndex1.pkIndex[keyRemoved]
+		if (rowObj===undefined)
+			throw "Could not find keyRemoved: "+keyRemoved+"."
+
+		return "-,"+tabular_output.formatCsvRecord(_.map(that.catalogueIndex1.orderedFieldNames, function(fieldName) {
+                return rowObj[fieldName]
+            }))
+	}).join("\n")
+
+    results += _.map(_.keys(this.changes), function(keyChanged) {
+        var changedFields = that.changes[keyChanged]
+        var oldRecord = that.catalogueIndex1.pkIndex[keyChanged]
+        var newRecord = that.catalogueIndex2.pkIndex[keyChanged]
+        return "x," + _.map(that.catalogueIndex1.orderedFieldNames, function(orderedFieldName) {
+            if (_.contains(changedFields, orderedFieldName))
+                return oldRecord[orderedFieldName] + " -> " + newRecord[orderedFieldName]
+            else
+                return ""
+        })
+    }).join("\n")
+
+	return results
+}
+
+CatalogueIndexDifferences.prototype.toHtmlDomTable = function() {
+
+    // TODO make sure header names are the header in both records
+	var document = jsdom.jsdom()
+	
+    var table = document.createElement("table")
+	var style = document.createElement("style")
+	style.type = "text/css"
+    style.appendChild(document.createTextNode("tr:nth-child(odd).added td { background-color: LightGreen; }\n" +
+			"tr:nth-child(even).added td { background-color: #CCEECC; }\n" +
+			"tr:nth-child(odd).removed td { background-color: LightCoral; }\n" +
+			"tr:nth-child(even).removed td { background-color: #F0BBBB; }\n" +
+			"tr:nth-child(4n).changed td { background-color: PeachPuff; }\n" +
+			"tr:nth-child(4n+1).changed td { background-color: PeachPuff; }\n" +
+			"tr:nth-child(4n+2).changed td { background-color: #FFECEE; }\n" +
+			"tr:nth-child(4n+3).changed td { background-color: #FFECEE; }\n" +
+			"th { background-color: NavajoWhite; font-style: italic }" +
+			"table { table-layout: fixed; width: 100%; border: thin solid; border-collapse: collapse; }" +
+			"th,td { border: thin solid; font-size: small; }\n" +
+			"td { word-wrap:break-word; font-family: Sans-Serif; font-size: small; }\n"))
+    table.appendChild(style)
+	var colGroup = document.createElement("colgroup")
+	_.forEach([17], function(width) {
+		var col = document.createElement("col")
+		col.width = width
+		colGroup.appendChild(col)
+	})
+	table.appendChild(colGroup)
+    var tableHeader = document.createElement("thead")
+    var headerRow = document.createElement("tr")
+    function appendCell(cellElementName, tableRow, text, optionalStyleClass) {
+        var cell = document.createElement(cellElementName)
+        if (optionalStyleClass)
+            cell.setAttribute("class", optionalStyleClass)
+        cell.appendChild(document.createTextNode(text))
+        tableRow.appendChild(cell)
+		return cell
+    }
+    function appendHeaderCell(text) { return appendCell("th", headerRow, text)}
+    function appendBodyCell(tableRow, text, optionalStyleClass) { return appendCell("td", tableRow, text, optionalStyleClass)}
+	appendHeaderCell("").setAttribute("style", "border-right-style: none;") // to leave room for a disposition cell (i.e +, -, x)
+    var headerCellCount = 0
+	_.forEach(this.catalogueIndex1.orderedFieldNames, function(orderedFieldName) {
+        var cell = appendHeaderCell(orderedFieldName)
+		if (headerCellCount==0)
+		{
+			cell.setAttribute("style", "border-left-style: none;")
+		}
+		headerCellCount++
+    })
+	tableHeader.appendChild(headerRow)
+    table.appendChild(tableHeader)
+    var tableBody = document.createElement("tbody")
+    table.appendChild(tableBody)
+
+    var that = this
+
+    _.forEach(this.keysAdded, function(keyAdded) {
+        var rowObj = that.catalogueIndex2.pkIndex[keyAdded]
+        if (rowObj===undefined)
+            throw "Could not find keyAdded: "+keyAdded+"."
+        var tableRow = document.createElement("tr", "added")
+		tableRow.className = "added"
+        appendBodyCell(tableRow, "+")
+        _.forEach(that.catalogueIndex1.orderedFieldNames, function(fieldName) {
+            appendBodyCell(tableRow, rowObj[fieldName])
+        })
+		tableBody.appendChild(tableRow)
+    })
+
+    _.forEach(this.keysRemoved, function(keyRemoved) {
+        var rowObj = that.catalogueIndex1.pkIndex[keyRemoved]
+        if (rowObj===undefined)
+            throw "Could not find keyRemoved: "+keyRemoved+"."
+        var tableRow = document.createElement("tr", "removed")
+		tableRow.className = "removed"
+        appendBodyCell(tableRow, "-")
+        _.forEach(that.catalogueIndex1.orderedFieldNames, function(fieldName) {
+            appendBodyCell(tableRow, rowObj[fieldName])
+        })
+		tableBody.appendChild(tableRow)
+    })
+
+    _.forEach(_.keys(this.changes), function(keyChanged) {
+        var changedFields = that.changes[keyChanged]
+        var oldRecord = that.catalogueIndex1.pkIndex[keyChanged]
+        var newRecord = that.catalogueIndex2.pkIndex[keyChanged]
+        var addTableRow = document.createElement("tr", "added")
+		addTableRow.className = "changed"
+		appendBodyCell(addTableRow, "+")
+		var removeTableRow = document.createElement("tr", "removed")
+		removeTableRow.className = "changed"
+		appendBodyCell(removeTableRow, "-")
+		tableBody.appendChild(addTableRow)
+		tableBody.appendChild(removeTableRow)
+		_.forEach(that.catalogueIndex1.orderedFieldNames, function(orderedFieldName) {
+            if (_.contains(changedFields, orderedFieldName))
+            {
+				appendBodyCell(removeTableRow, oldRecord[orderedFieldName])
+                appendBodyCell(addTableRow, newRecord[orderedFieldName])
+            }
+            else
+			{
+				appendBodyCell(addTableRow, oldRecord[orderedFieldName]).rowSpan = 2
+			}
+        })
+    })
+
+	return table
+}
+
+function CatalogueIndex(objArr, key, orderedFieldNames) {
+	if (!_.isArray(objArr))
+		throw "Provided objArr is not an array."
+	if (!_.isArray(orderedFieldNames))
+		throw "Provided orderedFieldNames is not an array, it's a " + (typeof orderedFieldNames) + "."
+	this.pkIndex = {}
+	this.pkMemo = {}
+	var that = this
+	_.forEach(objArr, function(elem) {
+		if (!_.isObject(elem) || _.isArray(elem))
+			throw "Element " + elem + " is not an associative array."
+		var pkVal = elem[key]
+		if (pkVal===undefined || pkVal===null)
+			throw "Couldn't find value for primary key: " + key +" in: " + elem + "."
+		that.pkIndex[pkVal] = elem
+		var orderedFieldNamesWithoutPk = _.without(orderedFieldNames, key)
+		that.pkMemo[elem[key]] = tabular_output.formatCsvRecord( _.map(orderedFieldNamesWithoutPk, function(fieldName) {
+			return elem[fieldName]
+		}) )
+	})
+	this.pkSort = _.sortBy(objArr, function(obj) {
+		return obj[key]
+	})
+	this.orderedFieldNames = orderedFieldNames
+	this.objArr = objArr
+	this.key = key
+}
+CatalogueIndex.prototype.diff = function(catIndex2) {
+	var keys2 = _.pluck(catIndex2.pkSort, this.key)
+	var keys1 = _.pluck(this.pkSort, this.key)
+	var added = _.difference(keys2, keys1)
+	var removed = _.difference(keys1, keys2)
+	var common = _.intersection(keys1, keys2)
+	var changes = {}
+	for (var i = 0; i < common.length; i++)
+	{
+		var key = common[i]
+		if (this.pkMemo[key] !== catIndex2.pkMemo[key]) {
+			var changedFields = []
+			changes[key] = changedFields
+
+			var oldRow = this.pkIndex[key]
+			var newRow = catIndex2.pkIndex[key]
+
+			_.forEach(this.orderedFieldNames, function(fieldName) {
+				if (oldRow[fieldName]!=newRow[fieldName])
+					changedFields.push(fieldName)
+			})
+		}
+	}
+	return new CatalogueIndexDifferences(added, removed, changes, this, catIndex2)
+}
+
+function compareExports(filePath1, filePath2, handleDiffs)
+{
+	var pk = "meta"
+	var sortByPk = function(objArr) {
+		return _.sortBy(objArr, function(obj) {
+			return obj[pk]
+		})
+	}
+
+	importFile(filePath1, function(imageCatalogue1) {
+		importFile(filePath2, function(imageCatalogue2) {
+			var imageIndex1 = new CatalogueIndex(sortByPk(imageCatalogue1), pk, ORDERED_FIELD_NAMES)
+			var imageIndex2 = new CatalogueIndex(sortByPk(imageCatalogue2), pk, ORDERED_FIELD_NAMES)
+
+			var diffs = imageIndex1.diff(imageIndex2)
+			handleDiffs(diffs)
+		})
+	})
+
+}
+
 var nhsoc_lyre = exports
 nhsoc_lyre.catalogueImagesFromNewHorizonsWebsite = catalogueImagesFromNewHorizonsWebsite
+nhsoc_lyre.importFile = importFile
+nhsoc_lyre.compareExports = compareExports
