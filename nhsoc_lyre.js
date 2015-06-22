@@ -76,14 +76,14 @@ function catalogueImagesFromNewHorizonsWebsite(page, format, testMode)
 
 			var highestPageNumberToRetrieve = page?page:highestPageNumber
 
-			var sandbox = {}
+			var sandbox = {
+				jsdom: jsdom
+			}
 
 			var evalResult = vm.runInNewContext(
 				[
 					"function pageWidth() { return 600 }",
-					"function Document() {}",
-					"Document.prototype.writeln = function() {}",
-					"document = new Document()",
+					"var document = jsdom.jsdom()",
 					inlineScripting
 				].join("\n"), sandbox)
 
