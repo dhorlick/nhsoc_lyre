@@ -414,12 +414,18 @@ CatalogueIndexDifferences.prototype.toCsv = function() {
 	return results
 }
 
-CatalogueIndexDifferences.prototype.toHtmlDomTable = function() {
+CatalogueIndexDifferences.prototype.toHtmlDomTable = function(optionalCaptionText) {
 
     // TODO make sure header names are the header in both records
 	var document = jsdom.jsdom()
 	
     var table = document.createElement("table")
+	if (optionalCaptionText)
+	{
+		var caption = document.createElement("caption")
+		caption.appendChild(document.createTextNode(optionalCaptionText))
+		table.appendChild(caption)
+	}
 	var style = document.createElement("style")
 	style.type = "text/css"
     style.appendChild(document.createTextNode("tr:nth-child(odd).added td { background-color: LightGreen; }\n" +
