@@ -34,7 +34,7 @@ nhsoc_lyre.compareExports(filePath1, filePath2, function(diffs) {
 				default: captionText = caption
 			}
 		}
-		var htmlDomTable = diffs.toHtmlDomTable(captionText)
+		var htmlDomTable = nhsoc_lyre.buildNhSocLinkedHtmlDomTable(diffs, captionText)
 		console.log(htmlDomTable.outerHTML)
 	}
 	else if (lowerCaseFormat==="csv")

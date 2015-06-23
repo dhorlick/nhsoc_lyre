@@ -414,7 +414,7 @@ CatalogueIndexDifferences.prototype.toCsv = function() {
 	return results
 }
 
-CatalogueIndexDifferences.prototype.toHtmlDomTable = function(optionalCaptionText) {
+CatalogueIndexDifferences.prototype.toHtmlDomTable = function(optionalCaptionText, optionalCellContentsTransform) {
 
     // TODO make sure header names are the header in both records
 	var document = jsdom.jsdom()
@@ -450,16 +450,21 @@ CatalogueIndexDifferences.prototype.toHtmlDomTable = function(optionalCaptionTex
 	table.appendChild(colGroup)
     var tableHeader = document.createElement("thead")
     var headerRow = document.createElement("tr")
-    function appendCell(cellElementName, tableRow, text, optionalStyleClass) {
+    function appendCell(cellElementName, tableRow, text, optionalStyleClass, fieldName)
+	{
         var cell = document.createElement(cellElementName)
         if (optionalStyleClass)
             cell.setAttribute("class", optionalStyleClass)
-        cell.appendChild(document.createTextNode(text))
+		var appendable = (!!optionalCellContentsTransform)?optionalCellContentsTransform(text, fieldName, document):document.createTextNode(text)
+        cell.appendChild(appendable)
         tableRow.appendChild(cell)
 		return cell
     }
     function appendHeaderCell(text) { return appendCell("th", headerRow, text)}
-    function appendBodyCell(tableRow, text, optionalStyleClass) { return appendCell("td", tableRow, text, optionalStyleClass)}
+    function appendBodyCell(tableRow, text, optionalStyleClass, fieldName)
+	{
+		return appendCell("td", tableRow, text, optionalStyleClass, fieldName)
+	}
 	appendHeaderCell("").setAttribute("style", "border-right-style: none;") // to leave room for a disposition cell (i.e +, -, x)
     var headerCellCount = 0
 	_.forEach(this.catalogueIndex1.orderedFieldNames, function(orderedFieldName) {
@@ -485,7 +490,7 @@ CatalogueIndexDifferences.prototype.toHtmlDomTable = function(optionalCaptionTex
 		tableRow.className = "added"
         appendBodyCell(tableRow, "+")
         _.forEach(that.catalogueIndex1.orderedFieldNames, function(fieldName) {
-            appendBodyCell(tableRow, rowObj[fieldName])
+            appendBodyCell(tableRow, rowObj[fieldName], undefined, fieldName)
         })
 		tableBody.appendChild(tableRow)
     })
@@ -498,7 +503,7 @@ CatalogueIndexDifferences.prototype.toHtmlDomTable = function(optionalCaptionTex
 		tableRow.className = "removed"
         appendBodyCell(tableRow, "-")
         _.forEach(that.catalogueIndex1.orderedFieldNames, function(fieldName) {
-            appendBodyCell(tableRow, rowObj[fieldName])
+            appendBodyCell(tableRow, rowObj[fieldName], undefined, fieldName)
         })
 		tableBody.appendChild(tableRow)
     })
@@ -518,12 +523,12 @@ CatalogueIndexDifferences.prototype.toHtmlDomTable = function(optionalCaptionTex
 		_.forEach(that.catalogueIndex1.orderedFieldNames, function(orderedFieldName) {
             if (_.contains(changedFields, orderedFieldName))
             {
-				appendBodyCell(removeTableRow, oldRecord[orderedFieldName])
-                appendBodyCell(addTableRow, newRecord[orderedFieldName])
+				appendBodyCell(removeTableRow, oldRecord[orderedFieldName], undefined, orderedFieldName)
+                appendBodyCell(addTableRow, newRecord[orderedFieldName], undefined, orderedFieldName)
             }
             else
 			{
-				appendBodyCell(addTableRow, oldRecord[orderedFieldName]).rowSpan = 2
+				appendBodyCell(addTableRow, oldRecord[orderedFieldName], undefined, orderedFieldName).rowSpan = 2
 			}
         })
     })
@@ -605,7 +610,29 @@ function compareExports(filePath1, filePath2, handleDiffs)
 
 }
 
+function buildNhSocLinkedHtmlDomTable(diffs, optionalCaption)
+{
+	return diffs.toHtmlDomTable(optionalCaption, function(text, fieldName, document) {
+		var textNode = document.createTextNode(text)
+		if (!fieldName || !document)
+			return textNode
+		var IMAGE_URL_BASE = "http://pluto.jhuapl.edu/soc/Pluto-Encounter/"
+		switch (fieldName.toLowerCase())
+		{
+			case "jpeg":
+			case "thumb":
+				var anchor = document.createElement("a")
+				anchor.href = (IMAGE_URL_BASE + text)
+				anchor.appendChild(textNode)
+				return anchor
+			default:
+				return textNode
+		}
+	})
+}
+
 var nhsoc_lyre = exports
 nhsoc_lyre.catalogueImagesFromNewHorizonsWebsite = catalogueImagesFromNewHorizonsWebsite
 nhsoc_lyre.importFile = importFile
 nhsoc_lyre.compareExports = compareExports
+nhsoc_lyre.buildNhSocLinkedHtmlDomTable = buildNhSocLinkedHtmlDomTable
