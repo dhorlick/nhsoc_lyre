@@ -1,0 +1,48 @@
+#!/bin/sh
+':' //; exec "$(command -v nodejs || command -v node)" "$0" "$@"
+
+var nhsoc_lyre = require("../nhsoc_lyre")
+var _ = require("underscore")
+var program = require('commander')
+var path = require("path")
+
+program
+	.usage('[options] file1.csv file2.csv')
+	.description("Compare previous CSV file products of the get_nhsoc_image_metadata command.")
+	.option('-f, --format [format]', 'output format HTML|CSV. defaults to HTML')
+	.option('-c, --caption [caption]', 'caption AUTO|NONE|your_caption. defaults to AUTO')
+
+program.parse(process.argv)
+var filePath1 = program.args[0]
+var filePath2 = program.args[1]
+var format = program.format?program.format:undefined
+var caption = program.caption?program.caption:undefined
+
+var lowerCaseFormat = format?format.toLowerCase():undefined
+
+nhsoc_lyre.compareExports(filePath1, filePath2, function(diffs) {
+	if (!lowerCaseFormat || lowerCaseFormat==="html")
+	{
+		var captionText = "Changes from "+path.basename(filePath1)+" to "+path.basename(filePath2)+"."
+		if (caption)
+		{
+			var lowercaseCaption = caption.toLowerCase()
+			switch (lowercaseCaption) {
+				case "auto": break
+				case "none": captionText = undefined
+					break
+				default: captionText = caption
+			}
+		}
+		var htmlDomTable = nhsoc_lyre.buildNhSocLinkedHtmlDomTable(diffs, captionText)
+		console.log(htmlDomTable.outerHTML)
+	}
+	else if (lowerCaseFormat==="csv")
+	{
+		console.log(diffs.toCsv())
+	}
+	else
+	{
+		throw "Unrecognized format: " + format + "."
+	}
+})
