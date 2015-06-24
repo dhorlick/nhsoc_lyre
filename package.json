@@ -1,6 +1,6 @@
 {
   "name": "nhsoc_lyre",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Catalogues New Horizons LORRI images.",
   "author": "Dave Horlick",
   "repository": {
@@ -21,7 +21,7 @@
   },
   "bin": {
     "get_nhsoc_image_metadata": "bin/get_nhsoc_image_metadata",
-    "diff_nhsoc_image_metadata": "bin/diff_nhsoc_image_metadata"
+    "diff_nhsoc_image_metadata_files": "bin/diff_nhsoc_image_metadata_files"
   },
   "main": "nhsoc_lyre.js",
   "scripts": {
