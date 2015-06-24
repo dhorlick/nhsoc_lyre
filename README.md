@@ -22,7 +22,13 @@ You'll need to install [Node.js and npm](https://nodejs.org) before you can inst
 
 Once you have Node.js and npm, you can choose to install nhsoc_lyre automatically, or from sources.
 
-nhsoc_lyre has been tested on Linux and Mac OS X. Although the core  code should run fine on Windows from the Node.js REPL, the command line scripts to harness them as yet do not.
+nhsoc_lyre has been tested on Linux and Mac OS X.
+
+On some Linux releases, you may need to alias the `node` command to `nodejs` to successfully install dependencies. If typing `node` doesn't start up a Node.js REPL (cntl-C to get out if it does), then
+
+`sudo ln -s /usr/bin/nodejs /usr/bin/node`
+
+Although the core  code should run fine on Windows from the Node.js REPL, the command line scripts to harness them as yet do not.
 
 ## Automated Installation
 
