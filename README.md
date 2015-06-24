@@ -18,9 +18,11 @@ The data from the inline JavaScript code doesn't include image publish dates. Co
 
 # Installation
 
-You'll need to install [Node.js and npm](https://nodejs.org) before you can install ngsoc_lyre.
+You'll need to install [Node.js and npm](https://nodejs.org) before you can install nhsoc_lyre.
 
 Once you have Node.js and npm, you can choose to install nhsoc_lyre automatically, or from sources.
+
+nhsoc_lyre has been tested on Linux and Mac OS X. Although the core  code should run fine on Windows from the Node.js REPL, the command line scripts to harness them as yet do not.
 
 ## Automated Installation
 
@@ -46,7 +48,9 @@ You shouldn't receive any error messages or be prompted to escalate shell privil
 
 # Usage
 
-To run the script, type
+## get_nhsoc_image_metadata
+
+To run the download script, type
 
 `./node_modules/.bin/get_nhsoc_image_metadata`
 
@@ -67,6 +71,20 @@ If you'd prefer a single page of data, provide that page's number as an argument
 If you elect to pull down metadata for all images on the project website, you should expect it to take a minute of time or longer.
 
 Although nhsoc_lyre doesn't retrieve actual images, it nevertheless can request a large amount of data. Please remember that this data and the server that hosts it are provided for everyone's benefit and use them respectfully.
+
+## diff_nhsoc_image_metadata_files
+
+Files downloaded as CSV can be compared to inventory changes
+
+`./node_modules/.bin/diff_nhsoc_image_metadata_files file_1.csv file_2.csv`
+
+Inventories can be generated either in HTML or CSV format by providing a `--format` option.
+
+As before, you may find it useful to redirect this script's output to a file.
+
+`./node_modules/.bin/diff_nhsoc_image_metadata_files file_1.csv file_2.csv > diff_1_2.html`
+
+The default HTML Table caption can be overridden by specifying a `--caption` option.
 
 # Validation
 
