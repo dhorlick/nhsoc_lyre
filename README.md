@@ -1,3 +1,5 @@
+> **NOTE: Broken and largely obsoleted by New Horizons SOC website overhaul on 2015-09-18**
+
 # Introduction
 
 New Horizons Science Operations Center Lyre (hereafter, "nhsoc_lyre") is a command line script for pulling down LORRI image metadata from the New Horizons project website. When this was written, the New Horizons spacecraft was well on its way to the Pluto System. After completing a flyby, it will proceed to one or more targets in the Kuiper Belt.
